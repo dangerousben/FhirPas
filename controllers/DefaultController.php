@@ -55,7 +55,9 @@ class DefaultController extends \BaseController
 
 			if (!$patients) throw new Exception("No patient found for hos_num '{$hos_num}'");
 
-			if (count($patients) > 1) \Yii::app()->user->setFlash('fhirpas_duplicate_patient', "Multiple patients found in PAS with hospital number '{$hos_num}'");
+			if (count($patients) > 1) {
+				\Yii::app()->user->setFlash('warning.fhirpas_duplicate_patient', "Multiple patients found in PAS with hospital number '{$hos_num}'");
+			}
 
 			$patient_id = \Yii::app()->service->Patient->create($patients[0]);
 		}
