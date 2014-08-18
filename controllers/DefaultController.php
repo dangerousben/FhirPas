@@ -51,17 +51,31 @@ class DefaultController extends \BaseController
 		if ($patient) {
 			$patient_id = $patient->id;
 		} else {
-			$patients = PatientSearch::search(array('hos_num' => $hos_num), false);
-
-			if (!$patients) throw new Exception("No patient found for hos_num '{$hos_num}'");
-
-			if (count($patients) > 1) {
-				\Yii::app()->user->setFlash('warning.fhirpas_duplicate_patient', "Multiple patients found in PAS with hospital number '{$hos_num}'");
-			}
-
-			$patient_id = \Yii::app()->service->Patient->create($patients[0]);
+			$patient_id = \Yii::app()->service->Patient->create($this->findPasPatientByHosNum($hos_num));
 		}
 
 		$this->redirect($this->createUrl('/patient/view', array('id' => $patient_id)));
+	}
+
+	public function actionRefresh()
+	{
+		$patient = $this->fetchModel('Patient', @$_POST['patient_id']);
+
+		\Yii::app()->service->Patient->update($patient->id, $this->findPasPatientByHosNum($patient->hos_num));
+
+		$this->redirect($this->createUrl('/patient/view', array('id' => $patient->id)));
+	}
+
+	private function findPasPatientByHosNum($hos_num)
+	{
+		$patients = PatientSearch::search(array('hos_num' => $hos_num), false);
+
+		if (!$patients) throw new \Exception("No patient found for hos_num '{$hos_num}'");
+
+		if (count($patients) > 1) {
+			\Yii::app()->user->setFlash('warning.fhirpas_duplicate_patient', "Multiple patients found in PAS with hospital number '{$hos_num}'");
+		}
+
+		return $patients[0];
 	}
 }

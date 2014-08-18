@@ -15,6 +15,7 @@
 
 return array(
 	'params' => array(
+		'patient_refresh_url' => '/FhirPas/default/refresh',
 		'search_tabs' => array(
 			array(
 				'title' => 'PAS search',
